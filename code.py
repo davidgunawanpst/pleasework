@@ -83,28 +83,37 @@ if st.button("Submit"):
             st.error(f"❌ Photo upload error: {e}")
 
         # --- Step 2: Log data to Sheet Webhook ---
-        data_success = True
+                # --- Step 2: Log data to Sheet Webhook ---
+        entries = []
         for item, qty in qty_dict.items():
             if qty > 0:
-                data_payload = {
+                entries.append({
                     "timestamp": timestamp,
                     "database": selected_db,
                     "po_number": selected_po,
                     "item": item,
-                    "quantity": qty,
-                    "drive_link": drive_folder_url
-                }
-                try:
-                    data_response = requests.post(WEBHOOK_URL_DATA, data=data_payload)
-                    if data_response.status_code == 200:
-                        st.success(f"✅ Logged: {item} - Qty {qty}")
-                    else:
-                        st.error(f"❌ Logging failed for {item}: {data_response.status_code} - {data_response.text}")
-                        data_success = False
-                except Exception as e:
-                    st.error(f"❌ Logging error for {item}: {e}")
-                    data_success = False
+                    "quantity": qty
+                })
 
+        if entries:
+            data_payload = {
+                "timestamp": timestamp,
+                "database": selected_db,
+                "po_number": selected_po,
+                "drive_folder_link": drive_folder_url,
+                "items": entries
+            }
+
+            try:
+                data_response = requests.post(WEBHOOK_URL_DATA, json=data_payload)
+                if data_response.status_code == 200:
+                    st.success("✅ Data logged successfully.")
+                else:
+                    st.error(f"❌ Data logging failed: {data_response.status_code} - {data_response.text}")
+                    data_success = False
+            except Exception as e:
+                st.error(f"❌ Logging error: {e}")
+                data_success = False
         # --- Final Feedback ---
         if photo_success and data_success:
             st.success("🎉 Submission completed successfully!")
