@@ -73,15 +73,20 @@ if st.button("Submit"):
         try:
             photo_response = requests.post(WEBHOOK_URL_PHOTO, json=photo_payload)
             if photo_response.status_code == 200:
-                json_resp = photo_response.json()
-                drive_folder_url = json_resp.get("folderUrl", "UPLOAD_FAILED")
-                st.success("✅ Photos uploaded successfully.")
-                st.markdown(f"[📂 View uploaded folder]({drive_folder_url})")
-                photo_success = True
+                try:
+                    json_resp = photo_response.json()
+                    drive_folder_url = json_resp.get("folderUrl", "UPLOAD_FAILED")
+                    st.success("✅ Photos uploaded successfully.")
+                    st.markdown(f"[📂 View uploaded folder]({drive_folder_url})")
+                    photo_success = True
+                except Exception as e:
+                    st.error(f"❌ Failed to parse photo upload response JSON: {e}")
+                    drive_folder_url = "UPLOAD_FAILED"
             else:
                 st.error(f"❌ Photo upload failed: {photo_response.status_code} - {photo_response.text}")
         except Exception as e:
             st.error(f"❌ Photo upload error: {e}")
+
 
 
         # --- Step 2: Log data to Sheet Webhook ---
