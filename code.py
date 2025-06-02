@@ -48,6 +48,7 @@ for item in selected_items:
 uploaded_files = st.file_uploader("Upload photos (unlimited):", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
 
 # --- Submission ---
+data_success = False
 if st.button("Submit"):
     if not selected_items or all(qty == 0 for qty in qty_dict.values()):
         st.error("Please select items and enter a non-zero quantity for at least one.")
