@@ -12,7 +12,7 @@ CSV_URL = f"https://docs.google.com/spreadsheets/d/1viV03CJxPsK42zZyKI6ZfaXlLR62
 
 # --- YOUR WEBHOOK URLs ---
 WEBHOOK_URL_PHOTO = "https://script.google.com/macros/s/AKfycbyds4um-AHIqGc32-92SbGw1FOfufUPF5QnfqE9CZUpjrw_iAinLwpZgJK8KhFhnUzAsg/exec"
-WEBHOOK_URL_DATA = "https://script.google.com/macros/s/AKfycby8gCryopX7t0YVJcDg-pMBnQ0D1BBjDgE8UOO5CTYvOU84pcq9vJzFWfZ5hzEmM5IHPw/exec"
+WEBHOOK_URL_DATA = "https://script.google.com/macros/s/AKfycbzO8fiJmjW3iS65pSqvcyPyHJJxlm6aweQxkAnwow8URxqp07tlk8SBaAHmVGihqe0Y0Q/exec"
 
 # --- Load PO Data from Google Sheet ---
 @st.cache_data
