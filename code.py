@@ -115,6 +115,7 @@ if st.button("Submit"):
                 data_response = requests.post(WEBHOOK_URL_DATA, json=data_payload)
                 if data_response.status_code == 200:
                     st.success("✅ Data logged successfully.")
+                    data_success= True
                 else:
                     st.error(f"❌ Data logging failed: {data_response.status_code} - {data_response.text}")
                     data_success = False
