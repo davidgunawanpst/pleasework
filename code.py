@@ -48,7 +48,6 @@ for item in selected_items:
 uploaded_files = st.file_uploader("Upload photos (unlimited):", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
 
 # --- Submission ---
-data_success = False
 if st.button("Submit"):
     if not selected_items or all(qty == 0 for qty in qty_dict.values()):
         st.error("Please select items and enter a non-zero quantity for at least one.")
@@ -93,6 +92,7 @@ if st.button("Submit"):
         # --- Step 2: Log data to Sheet Webhook ---
                 # --- Step 2: Log data to Sheet Webhook ---
         entries = []
+        data_success = False
         for item, qty in qty_dict.items():
             if qty > 0:
                 entries.append({
@@ -122,7 +122,6 @@ if st.button("Submit"):
                     data_success = False
             except Exception as e:
                 st.error(f"❌ Logging error: {e}")
-                data_success = False
         # --- Final Feedback ---
         if photo_success and data_success:
             st.success("🎉 Submission completed successfully!")
