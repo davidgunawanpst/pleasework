@@ -11,8 +11,8 @@ SHEET_NAME = "Master"
 CSV_URL = f"https://docs.google.com/spreadsheets/d/1viV03CJxPsK42zZyKI6ZfaXlLR62IbC0O3Lbi_hfGRo/gviz/tq?tqx=out:csv&sheet=Master"
 
 # --- YOUR WEBHOOK URLs ---
-WEBHOOK_URL_PHOTO = "https://script.google.com/macros/s/AKfycbxmdsSBxypMAMXaDywEM8lP1ApwG0Ood4UJWqj3-AucNq1eFbMXDVExrhjQ2UXXfLUw2g/exec"
-WEBHOOK_URL_DATA = "https://script.google.com/macros/s/AKfycby7JYyqaDQD3Ov95bFNCcelbCzoVRUELitQ8p0TpbosKB3xVPrxutya3EkGzdGBapq_-w/exec"
+WEBHOOK_URL_PHOTO = "https://script.google.com/macros/s/AKfycbyds4um-AHIqGc32-92SbGw1FOfufUPF5QnfqE9CZUpjrw_iAinLwpZgJK8KhFhnUzAsg/exec"
+WEBHOOK_URL_DATA = "https://script.google.com/macros/s/AKfycby8gCryopX7t0YVJcDg-pMBnQ0D1BBjDgE8UOO5CTYvOU84pcq9vJzFWfZ5hzEmM5IHPw/exec"
 
 # --- Load PO Data from Google Sheet ---
 @st.cache_data
@@ -67,19 +67,30 @@ if st.button("Submit"):
             ]
         }
 
+        drive_folder_url = "UPLOAD_FAILED"
         photo_success = False
-
+        
         try:
             photo_response = requests.post(WEBHOOK_URL_PHOTO, json=photo_payload)
             if photo_response.status_code == 200:
-                st.success("✅ Photos uploaded successfully.")
-                photo_success = True
+                try:
+                    json_resp = photo_response.json()
+                    drive_folder_url = json_resp.get("folderUrl", "UPLOAD_FAILED")
+                    st.success("✅ Photos uploaded successfully.")
+                    st.markdown(f"[📂 View uploaded folder]({drive_folder_url})")
+                    photo_success = True
+                except Exception as e:
+                    st.error(f"❌ Failed to parse photo upload response JSON: {e}")
+                    drive_folder_url = "UPLOAD_FAILED"
             else:
                 st.error(f"❌ Photo upload failed: {photo_response.status_code} - {photo_response.text}")
         except Exception as e:
             st.error(f"❌ Photo upload error: {e}")
 
+
+
         # --- Step 2: Log data to Sheet Webhook ---
+                # --- Step 2: Log data to Sheet Webhook ---
         entries = []
         for item, qty in qty_dict.items():
             if qty > 0:
@@ -91,13 +102,12 @@ if st.button("Submit"):
                     "quantity": qty
                 })
 
-        data_success = False
-
         if entries:
             data_payload = {
                 "timestamp": timestamp,
                 "database": selected_db,
                 "po_number": selected_po,
+                "drive_folder_link": drive_folder_url,
                 "items": entries
             }
 
@@ -105,12 +115,12 @@ if st.button("Submit"):
                 data_response = requests.post(WEBHOOK_URL_DATA, json=data_payload)
                 if data_response.status_code == 200:
                     st.success("✅ Data logged successfully.")
-                    data_success = True
                 else:
                     st.error(f"❌ Data logging failed: {data_response.status_code} - {data_response.text}")
+                    data_success = False
             except Exception as e:
                 st.error(f"❌ Logging error: {e}")
-
+                data_success = False
         # --- Final Feedback ---
         if photo_success and data_success:
             st.success("🎉 Submission completed successfully!")
