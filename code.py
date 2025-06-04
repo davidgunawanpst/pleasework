@@ -18,6 +18,8 @@ WEBHOOK_URL_DATA = "https://script.google.com/macros/s/AKfycbxsI5wHNRljBJ1CoqTXh
 @st.cache_data
 def load_po_data():
     df = pd.read_csv(CSV_URL)
+
+    # Build dictionary {Database: {PO Number: [Items]}}
     po_dict = {}
     for _, row in df.iterrows():
         db = row['Nama Perusahaan']
@@ -28,6 +30,7 @@ def load_po_data():
         if po not in po_dict[db]:
             po_dict[db][po] = []
         po_dict[db][po].append(item)
+
     return df, po_dict
 
 # --- Fixed PIC Dropdown ---
@@ -50,9 +53,12 @@ selected_db = st.selectbox("Select Database:", list(database_data.keys()))
 selected_po = st.selectbox("Select PO Number:", list(database_data[selected_db].keys()))
 
 # --- Lookup PIC PO and Vendor ---
-filtered_df = df_master[(df_master['Database'] == selected_db) & (df_master['Nomor PO'].astype(str) == selected_po)]
+filtered_df = df_master[
+    (df_master['Nama Perusahaan'] == selected_db) &
+    (df_master['PO Number'].astype(str) == selected_po)
+]
 
-selected_po_pic = filtered_df['PIC PO'].iloc[0] if not filtered_df.empty else "-"
+selected_po_pic = filtered_df['User Created PO'].iloc[0] if not filtered_df.empty else "-"
 po_vendor = filtered_df['Vendor'].iloc[0] if not filtered_df.empty else "-"
 
 st.markdown(f"**📌 PIC PO (From Source):** {selected_po_pic}")
@@ -92,7 +98,7 @@ if st.button("Submit"):
 
         drive_folder_url = "UPLOAD_FAILED"
         photo_success = False
-        
+
         try:
             photo_response = requests.post(WEBHOOK_URL_PHOTO, json=photo_payload)
             if photo_response.status_code == 200:
