@@ -29,7 +29,16 @@ def load_po_data():
             po_dict[db][po] = []
         po_dict[db][po].append(item)
     return po_dict
-
+# --- PIC Dropdown ---
+pic_list = [
+    "Rikie Dwi Permana",
+    "Idha Akhmad Sucahyo",
+    "Rian Dinata",
+    "Harimurti Krisandki",
+    "Muchamad Mustofa",
+    "Yogie Arie Wibowo"
+]
+selected_pic = st.selectbox("PIC:", pic_list)
 # --- UI ---
 st.title("Inbound Monitoring Form")
 
@@ -99,6 +108,7 @@ if st.button("Submit"):
                     "timestamp": timestamp,
                     "database": selected_db,
                     "po_number": selected_po,
+                    "pic": selected_pic,
                     "item": item,
                     "quantity": qty
                 })
@@ -108,6 +118,7 @@ if st.button("Submit"):
                 "timestamp": timestamp,
                 "database": selected_db,
                 "po_number": selected_po,
+                "pic": selected_pic,
                 "drive_folder_link": drive_folder_url,
                 "items": entries
             }
