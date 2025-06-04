@@ -52,7 +52,7 @@ selected_pic = st.selectbox("PIC (Submitting this form):", pic_list)
 selected_db = st.selectbox("Select Database:", list(database_data.keys()))
 selected_po = st.selectbox("Select PO Number:", list(database_data[selected_db].keys()))
 
-# --- Lookup PIC PO and Vendor ---
+# --- Lookup PO PIC and Vendor ---
 filtered_df = df_master[
     (df_master['Nama Perusahaan'] == selected_db) &
     (df_master['PO Number'].astype(str) == selected_po)
@@ -64,21 +64,34 @@ po_vendor = filtered_df['Vendor'].iloc[0] if not filtered_df.empty else "-"
 st.markdown(f"**📌 PIC PO (From Source):** {selected_po_pic}")
 st.markdown(f"**🏢 Vendor:** {po_vendor}")
 
-# --- Item and Quantity Input ---
+# --- Get Vessel Options (Cost Center Nama Kapal) ---
+vessel_options = sorted(
+    filtered_df['Cost Center Nama Kapal'].dropna().unique()
+)
+
+# --- Item, Quantity, and Vessel Input ---
 item_options = database_data[selected_db][selected_po]
 selected_items = st.multiselect("Select items received:", item_options)
 
-qty_dict = {}
+entry_data = {}
 for item in selected_items:
-    qty = st.number_input(f"Qty received for {item}", min_value=0, step=1, key=f"qty_{item}")
-    qty_dict[item] = qty
+    st.markdown(f"### Entry for: `{item}`")
+    col1, col2 = st.columns(2)
+    with col1:
+        qty = st.number_input(f"Quantity for `{item}`", min_value=0, step=1, key=f"qty_{item}")
+    with col2:
+        vessel = st.selectbox(f"Vessel for `{item}`", vessel_options, key=f"vessel_{item}")
+    entry_data[item] = {
+        "quantity": qty,
+        "vessel": vessel
+    }
 
 # --- Photo Upload ---
 uploaded_files = st.file_uploader("Upload photos (unlimited):", accept_multiple_files=True, type=["jpg", "jpeg", "png"])
 
 # --- Submission ---
 if st.button("Submit"):
-    if not selected_items or all(qty == 0 for qty in qty_dict.values()):
+    if not selected_items or all(values["quantity"] == 0 for values in entry_data.values()):
         st.error("Please select items and enter a non-zero quantity for at least one.")
     else:
         timestamp = datetime.now(ZoneInfo("Asia/Jakarta")).strftime("%Y-%m-%d_%H-%M-%S")
@@ -117,8 +130,8 @@ if st.button("Submit"):
 
         # --- Step 2: Send Metadata to Google Sheets ---
         entries = []
-        for item, qty in qty_dict.items():
-            if qty > 0:
+        for item, values in entry_data.items():
+            if values["quantity"] > 0:
                 entries.append({
                     "timestamp": timestamp,
                     "database": selected_db,
@@ -127,7 +140,8 @@ if st.button("Submit"):
                     "po_pic": selected_po_pic,
                     "vendor": po_vendor,
                     "item": item,
-                    "quantity": qty
+                    "quantity": values["quantity"],
+                    "vessel": values["vessel"]
                 })
 
         data_payload = {
