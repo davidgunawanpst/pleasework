@@ -20,9 +20,9 @@ def load_po_data():
     df = pd.read_csv(CSV_URL)
     po_dict = {}
     for _, row in df.iterrows():
-        db = row['Database']
-        po = str(row['Nomor PO'])
-        item = row['Item']
+        db = row['Nama Perusahaan']
+        po = str(row['PO Number'])
+        item = row['Item Name Complete']
         if db not in po_dict:
             po_dict[db] = {}
         if po not in po_dict[db]:
