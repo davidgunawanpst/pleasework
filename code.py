@@ -38,11 +38,11 @@ pic_list = [
     "Muchamad Mustofa",
     "Yogie Arie Wibowo"
 ]
-selected_pic = st.selectbox("PIC:", pic_list)
 # --- UI ---
 st.title("Inbound Monitoring Form")
 
 database_data = load_po_data()
+selected_pic = st.selectbox("PIC:", pic_list)
 selected_db = st.selectbox("Select Database:", list(database_data.keys()))
 selected_po = st.selectbox("Select PO Number:", list(database_data[selected_db].keys()))
 item_options = database_data[selected_db][selected_po]
