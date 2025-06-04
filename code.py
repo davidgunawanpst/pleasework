@@ -7,7 +7,7 @@ import base64
 
 # --- CONFIGURE GOOGLE SHEET SOURCE ---
 SHEET_ID = "1viV03CJxPsK42zZyKI6ZfaXlLR62IbC0O3Lbi_hfGRo"
-SHEET_NAME = "Master"
+SHEET_NAME = "Sheet2"
 CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
 
 # --- WEBHOOK URLs ---
